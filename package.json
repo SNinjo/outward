@@ -1,6 +1,6 @@
 {
     "name": "outward",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Outward is a tool that can calculate 2D coordinates, and it also used to parse the outward attributes of element in DOM, such as position, size, and angle.",
     "main": "./build/index.js",
     "types": "./build/index.d.ts",
