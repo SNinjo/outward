@@ -42,16 +42,6 @@ export class Dimensions {
 		this._coordinates[dimensionalNumber - 1] = value;
 	}
 
-	getDistance(): number
-	getDistance(referencePoint: Dimensions): number
-	getDistance(referencePoint = new Dimensions(this.numberOfCoordinates)): number {
-		return Math.sqrt(
-			this.coordinates.reduce((sum, coordinate, index) => (
-				sum + Math.pow((coordinate - referencePoint.getCoordinate(index + 1)), 2)
-			), 0)
-		);
-	}
-
 
 	private checkSameNumberOfCoordinates(dimensions: Dimensions): void {
 		if (this.numberOfCoordinates !== dimensions.numberOfCoordinates) throw new Error(`Both number of coordinates aren't same.`);
@@ -83,6 +73,31 @@ export class Dimensions {
 		if (this.numberOfCoordinates !== dimensions.numberOfCoordinates) return false;
 		else return this.coordinates.every((coordinate, index) => (coordinate === dimensions.coordinates[index]));
 	}
+
+	
+	getAbsoluteValue(): Dimensions {
+		const clonedDimensions = this.clone();
+		clonedDimensions.coordinates.forEach((coordinate, index) => {
+			clonedDimensions.setCoordinate((index + 1), Math.abs(coordinate));
+		});
+		return clonedDimensions;
+	}
+
+	getDistance(): number
+	getDistance(referencePoint: Dimensions): number
+	getDistance(referencePoint = new Dimensions(this.numberOfCoordinates)): number {
+		return Math.sqrt(
+			this.coordinates.reduce((sum, coordinate, index) => (
+				sum + Math.pow((coordinate - referencePoint.getCoordinate(index + 1)), 2)
+			), 0)
+		);
+	}
+
+	getCenter(): Dimensions
+	getCenter(referencePoint: Dimensions): Dimensions
+	getCenter(referencePoint = new Dimensions(this.numberOfCoordinates)): Dimensions {
+		return this.subtract(referencePoint).divide(2).add(referencePoint);
+	}
 }
 
 
@@ -112,6 +127,17 @@ export class TwoDimensional extends Dimensions {
 		return super.divide(divisor) as TwoDimensional;
 	}
 
+	
+	getAbsoluteValue(): TwoDimensional {
+		return super.getAbsoluteValue() as TwoDimensional;
+	}
+
+	getCenter(): TwoDimensional
+	getCenter(referencePoint: TwoDimensional): TwoDimensional
+	getCenter(referencePoint = new TwoDimensional()): TwoDimensional {
+		return super.getCenter(referencePoint) as TwoDimensional;
+	}
+
 
 	getAngle(): number | null
 	getAngle(referencePoint: TwoDimensional): number | null
@@ -128,8 +154,11 @@ export class TwoDimensional extends Dimensions {
 		if (originalAngle === null) return this.clone();
 
 		const hypotenuse = super.getDistance(referencePoint);
-		const variableRadianAngle = Angle.degreeToRadian(originalAngle - angle);
-		return new TwoDimensional([    (hypotenuse * Math.cos(variableRadianAngle)), (hypotenuse * Math.sin(variableRadianAngle))    ]).add(referencePoint);
+		const variableRadianAngle = Angle.degreeToRadian(originalAngle + angle);
+		const clonedDimensions = this.clone();
+		clonedDimensions.setCoordinate(1, (hypotenuse * Math.cos(variableRadianAngle)));
+		clonedDimensions.setCoordinate(2, (hypotenuse * Math.sin(variableRadianAngle)));
+		return clonedDimensions.add(referencePoint);
 	}
 }
 
@@ -164,19 +193,40 @@ export class Position extends TwoDimensional {
 	set y(value: number) {
 		this.setCoordinate(2, value);
 	}
-	
-	add(addend: TwoDimensional): Position {
-		return super.add(addend) as Position;
-	}
-	subtract(subtrahend: TwoDimensional): Position {
-		return super.subtract(subtrahend) as Position;
-	}
 
 	clone(): Position {
 		return new Position(this);
 	}
 	toString(): string {
 		return `Position {x: ${this.x}, y: ${this.y}}`;
+	}
+
+	add(addend: TwoDimensional): Position {
+		return super.add(addend) as Position;
+	}
+	subtract(subtrahend: TwoDimensional): Position {
+		return super.subtract(subtrahend) as Position;
+	}
+	multiply(multiple: number): Position {
+		return super.multiply(multiple) as Position;
+	}
+	divide(divisor: number): Position {
+		return super.divide(divisor) as Position;
+	}
+	
+	getAbsoluteValue(): Position {
+		return super.getAbsoluteValue() as Position;
+	}
+	getCenter(): Position
+	getCenter(referencePoint: TwoDimensional): Position
+	getCenter(referencePoint = new TwoDimensional()): Position {
+		return super.getCenter(referencePoint) as Position;
+	}
+	
+	rotate(angle: number): Position
+	rotate(angle: number, referencePoint: TwoDimensional): Position
+	rotate(angle: number, referencePoint = new TwoDimensional()): Position {
+		return super.rotate(angle, referencePoint) as Position;
 	}
 
 	transformToWeb(): Position {
@@ -230,18 +280,41 @@ export class Size extends TwoDimensional {
 		this.setCoordinate(2, value);
 	}
 	
+	clone(): Size {
+		return new Size(this);
+	}
+	toString(): string {
+		return `Size {width: ${this.width}, height: ${this.height}}`;
+	}
+	
 	add(addend: TwoDimensional): Size {
 		return super.add(addend) as Size;
 	}
 	subtract(subtrahend: TwoDimensional): Size {
 		return super.subtract(subtrahend) as Size;
 	}
-	
-	clone(): Size {
-		return new Size(this);
+	multiply(multiple: number): Size {
+		return super.multiply(multiple) as Size;
 	}
-	toString(): string {
-		return `Size {width: ${this.width}, height: ${this.height}}`;
+	divide(divisor: number): Size {
+		return super.divide(divisor) as Size;
+	}
+	
+	getAbsoluteValue(): Size {
+		return super.getAbsoluteValue() as Size;
+	}
+	getCenter(): Size
+	getCenter(referencePoint: TwoDimensional): Size
+	getCenter(referencePoint = new TwoDimensional()): Size {
+		const center = new TwoDimensional([this.width, this.height]).getCenter(referencePoint);
+		return new Size(center.getCoordinate(1), center.getCoordinate(2));
+	}
+	
+	rotate(angle: number): Size
+	rotate(angle: number, referencePoint: TwoDimensional): Size
+	rotate(angle: number, referencePoint = new TwoDimensional()): Size {
+		const rotatedPoint = new TwoDimensional([this.width, this.height]).rotate(angle, referencePoint);
+		return new Size(rotatedPoint.getCoordinate(1), rotatedPoint.getCoordinate(2));
 	}
 }
 
@@ -279,8 +352,8 @@ export class Angle {
 
 
 export default class Outward {
-	private position = new Position();
-	private size = new Size();
+	position = new Position();
+	size = new Size();
 	private angleDegree = 0;
 
 
