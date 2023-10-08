@@ -30,8 +30,12 @@ export class Dimensions {
 
 
 	private checkDimensionalNumber(dimensionalNumber: number): void {
-		if (dimensionalNumber > this.numberOfCoordinates) throw new Error(`The dimensional number (${dimensionalNumber}) cannot be more than the number of coordinates (${this.numberOfCoordinates}).`);
-		if (dimensionalNumber <= 0) throw new Error(`The dimensional number (${dimensionalNumber}) cannot be less than or equal to 0.`);
+		if (dimensionalNumber > this.numberOfCoordinates) {
+			throw new Error(`The dimensional number (${dimensionalNumber}) cannot be more than the number of coordinates (${this.numberOfCoordinates}).`);
+		}
+		if (dimensionalNumber <= 0) {
+			throw new Error(`The dimensional number (${dimensionalNumber}) cannot be less than or equal to 0.`);
+		}
 	}
 	getCoordinate(dimensionalNumber: number): number {
 		this.checkDimensionalNumber(dimensionalNumber);
