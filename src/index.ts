@@ -142,10 +142,9 @@ export class TwoDimensional extends Dimensions {
 	getAngle(): number | null
 	getAngle(referencePoint: TwoDimensional): number | null
 	getAngle(referencePoint = new TwoDimensional()): number | null {
-		let variableX = this.getCoordinate(1) - referencePoint.getCoordinate(1);
-		let variableY = this.getCoordinate(2) - referencePoint.getCoordinate(2);
-		if ((variableX === 0) && (variableY === 0)) return null;
-		else return Angle.simplify(Angle.radianToDegree( Math.atan2(variableY, variableX) ));
+		const variableDimension = this.subtract(referencePoint);
+		if (variableDimension.equal(new TwoDimensional())) return null;
+		else return Angle.simplify(Angle.radianToDegree( Math.atan2(variableDimension.getCoordinate(2), variableDimension.getCoordinate(1)) ));
 	}
 	rotate(angle: number): TwoDimensional
 	rotate(angle: number, referencePoint: TwoDimensional): TwoDimensional
